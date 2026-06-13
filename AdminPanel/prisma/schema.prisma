@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id         String   @id @default(cuid())
+  name       String
+  desc       String   @default("")
+  icon       String   @default("⚔️")     // v1: emoji/kısa ad; görsel yükleme Faz 2
+  priceGold  Int
+  effectType String                       // startGold | towerDamage | extraLives | none
+  effectValue Float
+  kind       String   @default("item")    // item | skin | theme
+  assetKey   String?                      // skin/tema varlık öneki (ör. "buz"); item'da null
+  premium    Boolean  @default(false)
+  status     String   @default("draft")   // draft | published | archived
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  // IAP rezerv alanları (spec):
+  storeProductId String?
+  priceTier      Int?
+}
+
+model CatalogState {
+  id          Int      @id @default(1)
+  version     Int      @default(0)
+  publishedAt DateTime @updatedAt
+}

@@ -1,0 +1,18 @@
+.DS_Store
+DerivedData/
+build/
+Vendor/
+*.xcodeproj
+.build/
+.swiftpm/
+xcuserdata/
+Generated/
+.superpowers/
+
+# AdminPanel (Next.js)
+AdminPanel/node_modules/
+AdminPanel/.next/
+AdminPanel/prisma/dev.db*
+AdminPanel/prisma/test.db*
+AdminPanel/.env
+AppIcons/

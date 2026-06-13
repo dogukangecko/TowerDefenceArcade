@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tower Defence — Orta Çağ Pixel-Art Kule Savunması (macOS &amp; iOS)</title>
+<meta name="description" content="SwiftUI + SpriteKit ile yazılmış, macOS ve iOS'ta native çalışan orta çağ temalı pixel-art tower defense. 50 seviyelik Sefer, 4 zorluk, Günlük Meydan Okuma, Sonsuz Mod, mutatörler ve başarımlar.">
+<meta property="og:title" content="Tower Defence — Orta Çağ Pixel-Art Kule Savunması">
+<meta property="og:description" content="50 seviyelik Sefer, 4 zorluk kademesi, Günlük Meydan Okuma ve Sonsuz Mod. macOS &amp; iOS, açık kaynak.">
+<meta property="og:image" content="site-assets/ss-gameplay.png">
+<link rel="icon" type="image/png" href="site-assets/logo.png">
+<style>
+:root{
+  --bg:#1A140C;
+  --bg2:#211910;
+  --panel:#2A2014;
+  --panel-hi:#352918;
+  --line:#4A3920;
+  --amber:#E8A33D;
+  --amber-hi:#F5BE6B;
+  --text:#EADFC8;
+  --muted:#A8997C;
+  --green:#7BA05B;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--amber);text-decoration:none}
+a:hover{color:var(--amber-hi)}
+img{max-width:100%;display:block}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+
+/* ---- pixel-ish headings ---- */
+h1,h2,h3,.pixel{
+  font-weight:800;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+h2{
+  font-size:1.5rem;
+  color:var(--amber);
+  text-align:center;
+  margin-bottom:8px;
+}
+.sub{
+  text-align:center;
+  color:var(--muted);
+  max-width:620px;
+  margin:0 auto 48px;
+}
+section{padding:80px 0}
+
+/* ---- nav ---- */
+nav{
+  position:sticky;top:0;z-index:50;
+  background:rgba(26,20,12,.92);
+  backdrop-filter:blur(8px);
+  border-bottom:2px solid var(--line);
+}
+nav .wrap{display:flex;align-items:center;gap:20px;height:60px}
+nav .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.1em;color:var(--text);font-size:.9rem}
+nav .brand img{width:30px;height:30px;image-rendering:pixelated;border-radius:6px}
+nav .links{margin-left:auto;display:flex;gap:22px;font-size:.85rem;letter-spacing:.05em}
+nav .links a{color:var(--muted)}
+nav .links a:hover{color:var(--amber)}
+nav .links a.cta{color:var(--bg);background:var(--amber);padding:7px 14px;border-radius:6px;font-weight:700}
+nav .links a.cta:hover{background:var(--amber-hi)}
+
+/* ---- hero ---- */
+.hero{
+  text-align:center;
+  padding:90px 0 70px;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(232,163,61,.10), transparent),
+    var(--bg);
+  border-bottom:2px solid var(--line);
+}
+.hero img.logo{
+  width:200px;height:200px;margin:0 auto 28px;
+  image-rendering:pixelated;
+  border-radius:36px;
+  border:2px solid var(--line);
+  filter:drop-shadow(0 12px 40px rgba(232,163,61,.25));
+}
+.hero h1{
+  font-size:clamp(2rem,6vw,3.2rem);
+  color:var(--amber);
+  text-shadow:3px 3px 0 #00000055;
+  margin-bottom:14px;
+}
+.hero p.slogan{
+  font-size:1.15rem;color:var(--text);
+  max-width:560px;margin:0 auto 12px;
+}
+.hero p.tagline{color:var(--muted);max-width:600px;margin:0 auto 36px;font-size:.95rem}
+.btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:34px}
+.btn{
+  display:inline-block;padding:14px 30px;border-radius:8px;
+  font-weight:800;letter-spacing:.06em;font-size:1rem;
+  border:2px solid var(--amber);transition:transform .15s,background .15s;
+}
+.btn.primary{background:var(--amber);color:var(--bg)}
+.btn.primary:hover{background:var(--amber-hi);transform:translateY(-2px);color:var(--bg)}
+.btn.ghost{color:var(--amber)}
+.btn.ghost:hover{background:rgba(232,163,61,.12);transform:translateY(-2px)}
+.badges{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;font-size:.78rem;letter-spacing:.05em}
+.badge{
+  background:var(--panel);border:1px solid var(--line);
+  color:var(--muted);padding:6px 12px;border-radius:99px;
+}
+
+/* ---- stats band ---- */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--line);border:2px solid var(--line)}
+.stat{background:var(--bg2);text-align:center;padding:28px 10px}
+.stat b{display:block;font-size:2rem;color:var(--amber);font-weight:800;letter-spacing:.05em}
+.stat span{font-size:.8rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+
+/* ---- features ---- */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:18px}
+.card{
+  background:var(--panel);
+  border:2px solid var(--line);
+  border-radius:10px;
+  padding:24px 22px;
+  transition:transform .15s,border-color .15s;
+}
+.card:hover{transform:translateY(-4px);border-color:var(--amber)}
+.card .ico{font-size:1.7rem;margin-bottom:12px}
+.card h3{font-size:.95rem;color:var(--amber);margin-bottom:8px;letter-spacing:.08em}
+.card p{font-size:.88rem;color:var(--muted)}
+
+/* ---- gallery ---- */
+.shots{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.shot{
+  background:var(--panel);border:2px solid var(--line);border-radius:10px;
+  overflow:hidden;transition:transform .2s,border-color .2s;
+}
+.shot:hover{transform:scale(1.025);border-color:var(--amber);z-index:2}
+.shot img{width:100%;aspect-ratio:1510/1023;object-fit:cover}
+.shot figcaption{padding:12px 16px;font-size:.83rem;color:var(--muted);letter-spacing:.04em;border-top:1px solid var(--line)}
+.shot.wide{grid-column:1/-1}
+
+/* ---- download ---- */
+#download{background:var(--bg2);border-top:2px solid var(--line);border-bottom:2px solid var(--line)}
+.dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.dlcard{
+  background:var(--panel);border:2px solid var(--line);border-radius:10px;
+  padding:28px 24px;display:flex;flex-direction:column;gap:12px;
+}
+.dlcard.featured{border-color:var(--amber)}
+.dlcard h3{font-size:1rem;color:var(--text);letter-spacing:.08em}
+.dlcard p{font-size:.86rem;color:var(--muted);flex-grow:1}
+.dlcard .note{
+  font-size:.78rem;color:var(--muted);background:var(--bg);
+  border-left:3px solid var(--amber);padding:8px 12px;border-radius:4px;
+}
+.dlcard .btn{text-align:center;font-size:.9rem;padding:12px 18px}
+.dlcard .btn.soon{border-color:var(--line);color:var(--muted);cursor:default}
+.dlcard .btn.soon:hover{background:none;transform:none}
+pre{
+  background:var(--bg);border:1px solid var(--line);border-radius:6px;
+  padding:14px;font-size:.76rem;overflow-x:auto;color:var(--green);
+  font-family:ui-monospace,"SF Mono",Menlo,monospace;line-height:1.7;
+}
+
+/* ---- credits ---- */
+.credits{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}
+.credit{background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:22px}
+.credit h3{font-size:.85rem;color:var(--amber);margin-bottom:10px;letter-spacing:.08em}
+.credit ul{list-style:none;font-size:.85rem;color:var(--muted)}
+.credit li{margin-bottom:6px}
+.cc0{
+  text-align:center;margin-top:28px;font-size:.82rem;color:var(--muted);
+  background:var(--panel);border:1px dashed var(--line);border-radius:8px;
+  padding:14px;max-width:640px;margin-left:auto;margin-right:auto;
+}
+
+/* ---- footer ---- */
+footer{
+  border-top:2px solid var(--line);padding:36px 0;text-align:center;
+  font-size:.82rem;color:var(--muted);letter-spacing:.05em;
+}
+footer .heart{color:var(--amber)}
+
+@media (max-width:720px){
+  nav .links a:not(.cta){display:none}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .shots{grid-template-columns:1fr}
+  section{padding:56px 0}
+  .hero{padding:60px 0 50px}
+  .hero img.logo{width:150px;height:150px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#">
+      <img src="site-assets/logo.png" alt="Tower Defence logosu">
+      TOWER&nbsp;DEFENCE
+    </a>
+    <div class="links">
+      <a href="#features">Özellikler</a>
+      <a href="#gallery">Galeri</a>
+      <a href="#credits">Krediler</a>
+      <a href="https://github.com/dogukangecko/TowerDefenceArcade">GitHub</a>
+      <a class="cta" href="#download">⬇ İndir</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <img class="logo" src="site-assets/logo.png" alt="Tower Defence — Arcade logosu">
+    <h1>Tower Defence</h1>
+    <p class="slogan">Kulelerini kur, üssünü dalgalara karşı savun.</p>
+    <p class="tagline">macOS ve iOS'ta native çalışan, SwiftUI + SpriteKit ile yazılmış
+    orta çağ temalı pixel-art kule savunma oyunu. Tamamen açık kaynak, tüm varlıklar CC0.</p>
+    <div class="btns">
+      <a class="btn primary" href="#download">⬇️ İndir</a>
+      <a class="btn ghost" href="https://github.com/dogukangecko/TowerDefenceArcade">GitHub'da İncele</a>
+    </div>
+    <div class="badges">
+      <span class="badge">🍎 macOS &amp; iOS</span>
+      <span class="badge">⚡ SwiftUI + SpriteKit</span>
+      <span class="badge">🎨 Pixel-art · Foozle Spire (CC0)</span>
+      <span class="badge">🧪 176 birim testi</span>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="stats">
+      <div class="stat"><b>50</b><span>Sefer seviyesi</span></div>
+      <div class="stat"><b>4</b><span>Zorluk kademesi</span></div>
+      <div class="stat"><b>8+8</b><span>Kule &amp; düşman</span></div>
+      <div class="stat"><b>11</b><span>Başarım</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <h2>Özellikler</h2>
+    <p class="sub">Kompakt ama derin: deterministik üretilmiş seviyeler, simülasyonla ayarlanmış denge ve bol tekrar oynanabilirlik.</p>
+    <div class="grid">
+      <div class="card">
+        <div class="ico">🗺️</div>
+        <h3>50 Seviyelik Sefer</h3>
+        <p>Tohumlu ve deterministik üretilen 50 seviye: yol, nehir ve dalga kompozisyonu her cihazda aynı. Kalan cana göre 1-3 yıldız, kilit ilerlemesi.</p>
+      </div>
+      <div class="card">
+        <div class="ico">💀</div>
+        <h3>4 Zorluk Kademesi</h3>
+        <p>Normal'den Kâbus'a dört kademe; her biri ayrı HP eğrisi izler. Kâbus, ancak diğer üç kademeyi tamamlayınca açılır — 3 canla hayatta kal.</p>
+      </div>
+      <div class="card">
+        <div class="ico">📅</div>
+        <h3>Günlük Meydan Okuma</h3>
+        <p>Her gün herkese aynı, tarihe tohumlu tek seviye. Günde tek deneme — kazanırsan ×2 Hazine. Yarın yeni harita seni bekler.</p>
+      </div>
+      <div class="card">
+        <div class="ico">∞</div>
+        <h3>Sonsuz Mod</h3>
+        <p>İki el yapımı arenada (Klasik Vadi, köprülü Nehir Geçidi) bitmeyen dalgalara karşı rekor denemesi. Yenilgi kaçınılmaz — soru, kaçıncı dalgada.</p>
+      </div>
+      <div class="card">
+        <div class="ico">🔮</div>
+        <h3>5 Mutatör</h3>
+        <p>Hızlı Düşmanlar, Cam Kuleler, Üç Kule, Altın Kıtlığı, Demir İrade. Birden fazlasını üst üste bindir, Hazine çarpanını ×4'e kadar katla.</p>
+      </div>
+      <div class="card">
+        <div class="ico">🏆</div>
+        <h3>11 Başarım</h3>
+        <p>Kusursuz zaferden Obsidyen Efendisi'ne 11 yerel başarım. Kazandıkların sonuç ekranında altın kapsül olarak parlar.</p>
+      </div>
+      <div class="card">
+        <div class="ico">🎨</div>
+        <h3>Skin Mağazası</h3>
+        <p>Buz, Kor ve Zehir kule skin setleri + Sonbahar haritası teması. 50 seviyeyi Kâbus'ta bitirene özel: 334 sprite'lık Obsidyen seti.</p>
+      </div>
+      <div class="card">
+        <div class="ico">⚖️</div>
+        <h3>Simülasyonla Denge</h3>
+        <p>Başsız simülatör ve GreedyPolicy botuyla (BalanceLab) otomatik ayarlanan zorluk eğrileri. 176 birim testiyle doğrulanmış oyun çekirdeği.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="gallery">
+  <div class="wrap">
+    <h2>Ekran Görüntüleri</h2>
+    <p class="sub">El çizimi Foozle Spire pixel-art'ı, canlı ambiyans katmanı ve seviyeye göre değişen paletler.</p>
+    <div class="shots">
+      <figure class="shot wide">
+        <img src="site-assets/ss-gameplay.png" alt="Oyun içi: kule hattı son boss dalgasını bekliyor" loading="lazy">
+        <figcaption>⚔️ Dalga 10 — boss geliyor! Kule hattın hazır mı?</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="site-assets/ss-menu.png" alt="Ana menü: Sefer, Günlük Meydan Okuma ve Sonsuz Mod" loading="lazy">
+        <figcaption>🏰 Ana menü — Sefer, Günlük Meydan Okuma, Sonsuz Mod</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="site-assets/ss-sefer.png" alt="Sefer ekranı: 50 seviyelik harita kartları ve yıldızlar" loading="lazy">
+        <figcaption>🗺️ Sefer — 50 üretilmiş seviye, yıldızlar ve kilit ilerlemesi</figcaption>
+      </figure>
+      <figure class="shot wide">
+        <img src="site-assets/ss-gameplay2.png" alt="Oyun içi: mancınık alan hasarıyla böcek sürüsünü vuruyor" loading="lazy">
+        <figcaption>💥 Mancınık iş başında — alan hasarı, hasar sayıları ve isabet flaşları</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section id="download">
+  <div class="wrap">
+    <h2>İndir</h2>
+    <p class="sub">Ücretsiz ve açık kaynak. İndir, oyna; beğenirsen depoya bir ⭐ bırak.</p>
+    <div class="dl">
+      <div class="dlcard featured">
+        <h3>🖥️ macOS</h3>
+        <p>Apple Silicon &amp; Intel. macOS 14+ önerilir.</p>
+        <div class="note">İmzasız build: ilk açılışta uygulamaya <b>sağ tık → Aç</b> demen yeterli.</div>
+        <a class="btn primary" href="https://github.com/dogukangecko/TowerDefenceArcade/releases/latest/download/TowerDefence-macOS.zip">⬇️ TowerDefence-macOS.zip</a>
+      </div>
+      <div class="dlcard">
+        <h3>📱 iOS</h3>
+        <p>iPhone ve iPad'de native dokunmatik kontrollerle.</p>
+        <span class="btn soon">App Store — yakında</span>
+      </div>
+      <div class="dlcard">
+        <h3>🛠️ Kaynaktan Derle</h3>
+        <p>Xcode 26+ ve XcodeGen yeterli:</p>
+<pre>git clone https://github.com/dogukangecko/TowerDefenceArcade
+cd TowerDefence
+./scripts/fetch_assets.sh
+./scripts/fetch_spire.sh
+xcodegen generate
+open TowerDefense.xcodeproj</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="credits">
+  <div class="wrap">
+    <h2>Krediler</h2>
+    <p class="sub">Bu oyun, eserlerini kamu malı olarak paylaşan sanatçılar sayesinde var. Teşekkürler!</p>
+    <div class="credits">
+      <div class="credit">
+        <h3>🎨 Sprite'lar</h3>
+        <ul>
+          <li><a href="https://foozlecc.itch.io/">Foozle — Spire serisi</a></li>
+          <li>Sanatçı: Baldur</li>
+          <li>Zemin, kuleler, düşmanlar, efektler</li>
+        </ul>
+      </div>
+      <div class="credit">
+        <h3>🔲 UI &amp; Sesler</h3>
+        <ul>
+          <li><a href="https://kenney.nl/assets/ui-pack-adventure">Kenney — UI Pack Adventure</a></li>
+          <li><a href="https://kenney.nl/assets/rpg-audio">Kenney — RPG Audio</a></li>
+          <li><a href="https://kenney.nl/assets/impact-sounds">Kenney — Impact Sounds</a></li>
+        </ul>
+      </div>
+      <div class="credit">
+        <h3>🎵 Müzik</h3>
+        <ul>
+          <li><a href="https://opengameart.org/content/medieval-the-old-tower-inn">RandomMind — The Old Tower Inn</a></li>
+          <li><a href="https://opengameart.org/content/medieval-market-day">RandomMind — Market Day</a></li>
+          <li><a href="https://opengameart.org/content/medieval-battle">RandomMind — Battle</a></li>
+        </ul>
+      </div>
+      <div class="credit">
+        <h3>🌲 Ambiyans</h3>
+        <ul>
+          <li><a href="https://opengameart.org/content/forest-ambience">TinyWorlds — Forest Ambience</a></li>
+          <li><a href="https://opengameart.org/content/crickets-ambient-noise-loopable">Wolfgang_ — Crickets</a></li>
+          <li><a href="https://opengameart.org/content/loopable-dungeon-ambience">JaggedStone — Dungeon Ambience</a></li>
+          <li><a href="https://opengameart.org/content/swamp-environment-audio">LokiF — Swamp Audio</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="cc0">Tüm görsel ve ses varlıkları <b>CC0 (Public Domain)</b> lisansıyla yayımlanmıştır — atıf zorunlu değil, ama hak edenlere teşekkür borç. Ayrıntılar: <a href="https://github.com/dogukangecko/TowerDefenceArcade/blob/main/CREDITS.md">CREDITS.md</a></p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p><a href="https://github.com/dogukangecko/TowerDefenceArcade">github.com/dogukangecko/TowerDefenceArcade</a></p>
+    <p>SwiftUI + SpriteKit ile <span class="heart">♥</span> yapıldı · © 2026 Doğukan Gecko</p>
+  </div>
+</footer>
+
+</body>
+</html>

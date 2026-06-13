@@ -1,0 +1,50 @@
+name: TowerDefense
+options:
+  bundleIdPrefix: com.gecko
+  deploymentTarget:
+    iOS: "16.0"
+    macOS: "13.0"
+packages:
+  GameCore:
+    path: GameCore
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    CODE_SIGN_IDENTITY: "-"
+    ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+targets:
+  TowerDefense-macOS:
+    type: application
+    platform: macOS
+    sources: [TowerDefense]
+    dependencies:
+      - package: GameCore
+    info:
+      path: Generated/Info-macOS.plist
+      properties:
+        CFBundleDisplayName: Tower Defence
+        CFBundleName: Tower Defence
+        NSHumanReadableCopyright: ""
+        # Katalog API'si geliştirmede http://localhost:3000 — ATS yerel ağ istisnası.
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+  TowerDefense-iOS:
+    type: application
+    platform: iOS
+    sources: [TowerDefense]
+    dependencies:
+      - package: GameCore
+    info:
+      path: Generated/Info-iOS.plist
+      properties:
+        CFBundleDisplayName: Tower Defence
+        CFBundleName: Tower Defence
+        # Katalog API'si geliştirmede http://localhost:3000 — ATS yerel ağ istisnası.
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+        UIRequiresFullScreen: true
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
